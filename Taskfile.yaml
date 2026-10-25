@@ -1,0 +1,21 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: "3"
+
+includes:
+  sops: .taskfiles/sops/Taskfile.yaml
+
+tasks:
+  default:
+    silent: true
+    cmd: task --list
+
+  setup:
+    desc: Install git hooks and the SOPS diff driver (re-runs mise install for drift)
+    cmds:
+      - mise install
+      - mise exec -- pre-commit install --install-hooks
+      - git config diff.sopsdiffer.textconv "mise exec -- sops decrypt"
+
+  lint:
+    desc: Run all pre-commit hooks against every file
+    cmd: mise exec -- pre-commit run --all-files

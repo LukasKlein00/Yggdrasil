@@ -1,0 +1,11 @@
+# `task sops:init` fills in the age public key. Until then every encrypt fails (fail closed).
+# Files matching no rule cannot be encrypted at all — add a rule rather than a catch-all.
+creation_rules:
+  - path_regex: kubernetes/.*\.sops\.ya?ml$
+    encrypted_regex: "^(data|stringData)$"
+    age: age1cjy3enczjwdk9z74mvsmxze4hqwyr5wdy2gly9635ezkkgewkagsqyl4jg
+  - path_regex: talos/.*\.sops\.ya?ml$
+    age: age1cjy3enczjwdk9z74mvsmxze4hqwyr5wdy2gly9635ezkkgewkagsqyl4jg
+  # Proxmox answer file, Tofu provider credentials, host Ansible vars: whole-file encryption
+  - path_regex: infrastructure/.*\.sops\.[^/]+$
+    age: age1cjy3enczjwdk9z74mvsmxze4hqwyr5wdy2gly9635ezkkgewkagsqyl4jg

@@ -1,0 +1,41 @@
+# --- AI agent instructions & working files (kept local, never published) ---
+CLAUDE.md
+CLAUDE.local.md
+AGENTS.md
+GEMINI.md
+.claude/
+.agents/
+.codex/
+.gemini/
+.cursor/
+.cursorrules
+.github/copilot-instructions.md
+.superpowers/
+docs/superpowers/
+
+# --- Secrets & decrypted material: must never be committed ---
+*.decrypted.*
+*.dec.*
+*.agekey
+keys.txt
+.env
+.env.*
+kubeconfig
+talosconfig
+# talhelper genconfig output (rendered machine configs contain cluster secrets)
+talos/*/clusterconfig/
+# rendered Proxmox auto-install answer file (decrypted on the fly at ISO build)
+infrastructure/proxmox/answer.toml
+infrastructure/proxmox/*.iso
+
+# --- OpenTofu (state contains secrets; backend decided in phase 3) ---
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+
+# --- Editors / OS ---
+.vscode/
+.idea/
+.DS_Store

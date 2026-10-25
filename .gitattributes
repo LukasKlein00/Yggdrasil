@@ -1,0 +1,4 @@
+* text=auto eol=lf
+# Show decrypted diffs locally (configured by `task setup`); falls back to raw diff elsewhere
+*.sops.* diff=sopsdiffer
+.sops.yaml diff

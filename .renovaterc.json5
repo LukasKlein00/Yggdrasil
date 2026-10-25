@@ -1,0 +1,34 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: [
+    "github>home-operations/renovate-presets#10.0.1",
+    "github>home-operations/renovate-presets//apps/talosFactory.json5#10.0.1",
+  ],
+  timezone: "Europe/Berlin",
+  schedule: ["every weekend"],
+  // Nothing lands in prod the day it's released.
+  minimumReleaseAge: "3 days",
+  "pre-commit": { enabled: true },
+  packageRules: [
+    {
+      description: "Mise tools in one PR",
+      matchManagers: ["mise"],
+      groupName: "mise tools",
+    },
+    {
+      description: "talosctl and Talos installer image move together",
+      matchPackageNames: ["siderolabs/talos", "talosctl", "/siderolabs/installer/"],
+      groupName: "talos",
+    },
+    {
+      description: "kubectl and the Kubernetes version Talos runs move together",
+      matchPackageNames: ["/kubernetes/kubernetes/", "/kubectl/", "/siderolabs/kubelet/"],
+      groupName: "kubernetes",
+    },
+    {
+      description: "Majors always need a human",
+      matchUpdateTypes: ["major"],
+      addLabels: ["type/major"],
+    },
+  ],
+}

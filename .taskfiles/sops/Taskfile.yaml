@@ -1,0 +1,44 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: "3"
+
+vars:
+  AGE_KEY_FILE: "{{.HOME}}/.config/sops/age/keys.txt"
+
+tasks:
+  init:
+    desc: Create the age key (if missing) and write its public key into .sops.yaml
+    cmds:
+      - |
+        if [ ! -f "{{.AGE_KEY_FILE}}" ]; then
+          mkdir -p "$(dirname "{{.AGE_KEY_FILE}}")"
+          mise exec -- age-keygen -o "{{.AGE_KEY_FILE}}"
+          chmod 600 "{{.AGE_KEY_FILE}}"
+          echo ">>> New age key at {{.AGE_KEY_FILE}} - store the whole file in the password manager NOW."
+        fi
+      - |
+        pub="$(mise exec -- age-keygen -y "{{.AGE_KEY_FILE}}")"
+        sed -i "s/AGE_PUBLIC_KEY/${pub}/g" "{{.ROOT_DIR}}/.sops.yaml"
+        echo "Public key in .sops.yaml: ${pub}"
+    status:
+      - test -f "{{.AGE_KEY_FILE}}"
+      - "! grep -q AGE_PUBLIC_KEY {{.ROOT_DIR}}/.sops.yaml"
+
+  encrypt:
+    desc: Encrypt a file in place (FILE=path/to/x.sops.yaml)
+    requires:
+      vars: [FILE]
+    cmd: mise exec -- sops encrypt --in-place "{{.FILE}}"
+
+  encrypt-all:
+    desc: Encrypt every *.sops.* file that is still plaintext
+    cmd: |
+      git -C "{{.ROOT_DIR}}" ls-files --cached --others --exclude-standard '*.sops.*' | grep -v '^\.sops\.yaml$' | while read -r f; do
+        if ! "{{.ROOT_DIR}}/scripts/check-sops.sh" "$f" 2>/dev/null; then
+          echo "encrypting $f"; mise exec -- sops encrypt --in-place "$f"
+        fi
+      done
+
+  updatekeys:
+    desc: Re-encrypt all SOPS files for the recipients in .sops.yaml (after key rotation)
+    cmd: |
+      git -C "{{.ROOT_DIR}}" ls-files '*.sops.*' | grep -v '^\.sops\.yaml$' | xargs -r -n1 mise exec -- sops updatekeys --yes
